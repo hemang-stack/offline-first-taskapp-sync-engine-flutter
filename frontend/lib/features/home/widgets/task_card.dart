@@ -1,7 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:frontend/features/tasks/models/task_UI_model.dart';
-import 'package:frontend/features/tasks/pages/create_task_page.dart';
+import 'package:flutter/material.dart'; 
 import 'package:frontend/features/tasks/pages/task_details_page.dart';
+import 'package:frontend/models/task_model.dart';
 
 import '../../tasks/widgets/shared/task_checkbox.dart';
 import '../../../core/common/widgets/glass_container.dart';
@@ -12,7 +11,7 @@ class TaskCard extends StatefulWidget {
   final String title;
   final String subtitle;
   final bool completed;
-  final TaskUIModel task;
+  final TaskModel task;
 
   const TaskCard(
       {super.key,

@@ -11,31 +11,62 @@ class TaskDescriptionInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
+    return TextFormField(
       controller: descriptionController,
+
       minLines: 2,
       maxLines: 4,
+
       cursorColor: AppColors.primary,
+
       style: const TextStyle(
         color: AppColors.textPrimary,
         fontSize: 13,
         height: 1.8,
       ),
+
+      validator: (value) {
+        if (value == null ||
+            value.trim().isEmpty) {
+          return "Description is required";
+        }
+
+        return null;
+      },
+
       decoration: InputDecoration(
-        hintText: "add context, notes, goals or details...",
+        hintText:
+            "add context, notes, goals or details...",
+
         hintStyle: TextStyle(
-            color: Colors.white.withOpacity(.18),
-            fontSize: 16,
-            height: 0.75,
-            fontWeight: FontWeight.bold),
+          color:
+              Colors.white.withOpacity(.18),
+
+          fontSize: 16,
+
+          height: .75,
+
+          fontWeight:
+              FontWeight.bold,
+        ),
+
         border: InputBorder.none,
         enabledBorder: InputBorder.none,
         focusedBorder: InputBorder.none,
         disabledBorder: InputBorder.none,
+
         filled: false,
-        contentPadding: EdgeInsets.zero,
+
+        contentPadding:
+            EdgeInsets.zero,
+
         isDense: true,
         isCollapsed: true,
+
+        errorStyle: const TextStyle(
+          color: Colors.redAccent,
+          fontSize: 11,
+        ),
       ),
     );
   }

@@ -13,11 +13,15 @@ class TaskTitleInput extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: titleController,
+      validator: (value) {
+        if (value == null || value.trim().isEmpty) {
+          return "Title is required";
+        }
 
+        return null;
+      },
       maxLines: 4,
-
       cursorColor: AppColors.primary,
-
       style: const TextStyle(
         color: AppColors.textPrimary,
         fontSize: 46,
@@ -25,12 +29,10 @@ class TaskTitleInput extends StatelessWidget {
         height: 1,
         letterSpacing: -2,
       ),
-
       decoration: InputDecoration(
         hintText: "what's the move?",
         hintStyle: TextStyle(
-          color:
-              Colors.white.withOpacity(.12),
+          color: Colors.white.withOpacity(.12),
         ),
         border: InputBorder.none,
       ),

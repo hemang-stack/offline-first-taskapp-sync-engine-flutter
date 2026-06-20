@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/features/tasks/models/task_UI_model.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:frontend/features/auth/cubit/auth_cubit.dart';
+import 'package:frontend/features/tasks/cubit/tasks_cubit.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -8,146 +10,122 @@ import '../widgets/curator_appbar.dart';
 import '../widgets/empty_tasks.dart';
 import '../widgets/task_card.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+
+    final authState = context.read<AuthCubit>().state;
+
+    if (authState is AuthLoggedIn) {
+      context.read<TasksCubit>().getAllTasks(
+            token: authState.user.token,
+          );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-
-    /// TEMP MOCK TASKS
-    final tasks = <TaskUIModel>[
-      TaskUIModel(
-        id: '1',
-        title: 'Refine interaction architecture',
-        description:
-            'Refine interaction architecture and improve overall motion consistency throughout the Curator experience.',
-        priority: TaskPriority.urgent,
-        scheduledAt: DateTime.now(),
-        category: 'creative',
-      ),
-
-      TaskUIModel(
-        id: '2',
-        title: 'Prepare product launch deck',
-        description:
-            'Prepare launch deck and align all stakeholders before presentation.',
-        priority: TaskPriority.focused,
-        scheduledAt: DateTime.now(),
-        category: 'deep_work',
-      ),
-
-      TaskUIModel(
-        id: '3',
-        title: 'Moodboard exploration session',
-        description:
-            'Collect references and build visual direction for upcoming project.',
-        priority: TaskPriority.chill,
-        scheduledAt: DateTime.now(),
-        category: 'creative',
-      ),
-    ];
-
     return Scaffold(
       backgroundColor: AppColors.background,
-
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg,
           ),
+          child: BlocBuilder<TasksCubit, TasksState>(
+            builder: (context, state) {
+              if (state is TasksLoading) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
 
-          child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
+              if (state is TasksError) {
+                return Center(
+                  child: Text(
+                    state.error,
+                    style: const TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                );
+              }
 
-            children: [
-              const SizedBox(height: 18),
+              if (state is GetTaskSuccess) {
+                final tasks = state.tasks;
 
-              /// APPBAR
-              const CuratorAppbar(),
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 18),
+                    const CuratorAppbar(),
+                    const SizedBox(height: 46),
+                    const FittedBox(
+                      alignment: Alignment.centerLeft,
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        "good evening.",
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 40,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -2,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      "${tasks.length} ITEMS AWAITING CURATION",
+                      style: const TextStyle(
+                        color: AppColors.primarySoft,
+                        fontSize: 10,
+                        letterSpacing: 3,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 36),
+                    Expanded(
+                      child: tasks.isEmpty
+                          ? const EmptyTasks()
+                          : ListView.separated(
+                              physics: const BouncingScrollPhysics(),
+                              itemCount: tasks.length,
+                              separatorBuilder: (_, __) => const SizedBox(
+                                height: 18,
+                              ),
+                              itemBuilder: (context, index) {
+                                final task = tasks[index];
 
-              const SizedBox(height: 46),
+                                return TaskCard(
+                                  task: task,
+                                  title: task.title,
+                                  subtitle: task.priority.toUpperCase(),
+                                  completed: task.isCompleted,
+                                );
+                              },
+                            ),
+                    ),
+                  ],
+                );
+              }
 
-              /// HEADER
-              const FittedBox(
-                alignment: Alignment.centerLeft,
-                fit: BoxFit.scaleDown,
-
+              return const Center(
                 child: Text(
-                  "good evening.",
-
+                  "No State Found",
                   style: TextStyle(
-                    color:
-                        AppColors.textPrimary,
-
-                    fontSize: 40,
-
-                    fontWeight:
-                        FontWeight.w700,
-
-                    letterSpacing: -2,
+                    color: Colors.white,
                   ),
                 ),
-              ),
-
-              const SizedBox(height: 10),
-
-              Text(
-                "${tasks.length} ITEMS AWAITING CURATION",
-
-                style: const TextStyle(
-                  color:
-                      AppColors.primarySoft,
-
-                  fontSize: 10,
-
-                  letterSpacing: 3,
-
-                  fontWeight:
-                      FontWeight.w600,
-                ),
-              ),
-
-              const SizedBox(height: 36),
-
-              /// TASKS
-              Expanded(
-                child: tasks.isEmpty
-                    ? const EmptyTasks()
-                    : ListView.separated(
-                        physics:
-                            const BouncingScrollPhysics(),
-
-                        itemCount: tasks.length,
-
-                        separatorBuilder:
-                            (_, __) =>
-                                const SizedBox(
-                          height: 18,
-                        ),
-
-                        itemBuilder:
-                            (context, index) {
-
-                          final task =
-                              tasks[index];
-
-                          return TaskCard(
-                            task: task,
-
-                            title:
-                                task.title,
-
-                            subtitle:
-                                "${task.priority.name.toUpperCase()} • ${task.time}",
-
-                            completed:
-                                task.isCompleted,
-                          );
-                        },
-                      ),
-              ),
-            ],
+              );
+            },
           ),
         ),
       ),
