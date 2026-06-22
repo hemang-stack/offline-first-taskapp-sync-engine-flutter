@@ -53,18 +53,19 @@ class TaskRemoteRepository {
         },
       );
 
-      if (res.statusCode != 200) {
+      if (res.statusCode != 200 && res.statusCode != 201) {
         throw jsonDecode(res.body)['error'];
       }
 
-      final listOfTasks = jsonDecode(res.body);
-      List<TaskModel> taskLists = [];
+      final List<dynamic> listOfTasks = jsonDecode(res.body);
 
-      for(var elem in listOfTasks){
-        taskLists.add(TaskModel.fromMap(elem));
-      }
-
-      return taskLists;
+      return listOfTasks
+          .map(
+            (e) => TaskModel.fromMap(
+              Map<String, dynamic>.from(e),
+            ),
+          )
+          .toList();
     } catch (e) {
       rethrow;
     }

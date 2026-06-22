@@ -6,7 +6,9 @@ import 'package:frontend/models/task_model.dart';
 part 'tasks_state.dart';
 
 class TasksCubit extends Cubit<TasksState> {
-  TasksCubit() : super(const TasksInitial());
+  TasksCubit() : super(const TasksInitial()){
+    print("TASKS CUBIT CREATED");
+  }
 
   final taskRemoteRepository = TaskRemoteRepository();
 
@@ -41,16 +43,14 @@ class TasksCubit extends Cubit<TasksState> {
   Future<void> getAllTasks({
     required String token,
   }) async {
-    try {
-      emit(const TasksLoading());
+    print("GET TASKS CALLED");
 
-      final tasks = await taskRemoteRepository.getTasks(
-        token: token,
-      );
+    emit(TasksLoading());
 
-      emit(GetTaskSuccess(tasks));
-    } catch (e) {
-      emit(TasksError(e.toString()));
-    }
+    final tasks = await taskRemoteRepository.getTasks(
+      token: token,
+    );
+
+    emit(GetTaskSuccess(tasks));
   }
 }
