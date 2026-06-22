@@ -40,6 +40,32 @@ class TasksCubit extends Cubit<TasksState> {
     }
   }
 
+  Future<void> deleteTask({
+  required String taskId,
+  required String token,
+}) async {
+  try {
+    emit(
+      const TasksLoading(),
+    );
+
+    await taskRemoteRepository.deleteTask(
+      taskId: taskId,
+      token: token,
+    );
+
+    emit(
+      const DeleteTaskSuccess(),
+    );
+  } catch (e) {
+    emit(
+      TasksError(
+        e.toString(),
+      ),
+    );
+  }
+}
+
   Future<void> getAllTasks({
     required String token,
   }) async {

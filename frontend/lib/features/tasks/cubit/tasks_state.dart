@@ -23,3 +23,7 @@ final class GetTaskSuccess extends TasksState {
 
   const GetTaskSuccess(this.tasks);
 }
+
+final class DeleteTaskSuccess extends TasksState {
+  const DeleteTaskSuccess();
+}

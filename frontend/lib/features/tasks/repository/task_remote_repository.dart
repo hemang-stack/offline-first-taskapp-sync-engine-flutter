@@ -15,7 +15,6 @@ class TaskRemoteRepository {
     required String token,
   }) async {
     try {
-
       final res = await http.post(Uri.parse("${Constants.backendUri}/tasks"),
           headers: {
             'Content-Type': 'application/json',
@@ -35,7 +34,6 @@ class TaskRemoteRepository {
       if (res.statusCode != 201) {
         throw jsonDecode(res.body)['error'];
       }
-
 
       return TaskModel.fromJson(res.body);
     } catch (e) {
@@ -75,6 +73,30 @@ class TaskRemoteRepository {
       }
 
       return TaskModel.fromJson(res.body);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> deleteTask({
+    required String taskId,
+    required String token,
+  }) async {
+    try {
+      final res = await http.delete(
+        Uri.parse("${Constants.backendUri}/tasks"),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token,
+        },
+        body: jsonEncode({
+          'taskId': taskId,
+        }),
+      );
+
+      if (res.statusCode != 200) {
+        throw jsonDecode(res.body)['error'];
+      }
     } catch (e) {
       rethrow;
     }
