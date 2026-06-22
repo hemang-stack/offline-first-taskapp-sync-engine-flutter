@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:frontend/features/tasks/cubit/add_new_task_cubit.dart';
 import 'package:frontend/features/tasks/models/task_UI_model.dart';
 import 'package:frontend/features/tasks/repository/task_remote_repository.dart';
 import 'package:frontend/models/task_model.dart';
@@ -34,7 +35,6 @@ class TasksCubit extends Cubit<TasksState> {
         token: token,
       );
 
-      emit(AddNewTaskSuccess(task));
     } catch (e) {
       emit(TasksError(e.toString()));
     }
@@ -43,7 +43,6 @@ class TasksCubit extends Cubit<TasksState> {
   Future<void> getAllTasks({
     required String token,
   }) async {
-    print("GET TASKS CALLED");
 
     emit(TasksLoading());
 

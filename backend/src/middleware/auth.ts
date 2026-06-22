@@ -35,16 +35,22 @@ export const auth = async (
             .from(users)
             .where(eq(users.id, verifiedToken.id));
 
-        if (!user) {
-            res.status(401).json({ error: "User not Found" });
+        if (user.length === 0) {
+            res.status(401).json({
+                error: "User not Found",
+            });
             return;
-        };
+        }
 
         req.user = verifiedToken.id;
         req.token = token;
 
         next();
     } catch (e) {
-        res.status(500).json({error: 'Some Error'});
-    };
+    console.error("AUTH ERROR:", e);
+
+    res.status(500).json({
+        error: String(e),
+    });
+}
 };

@@ -15,6 +15,7 @@ class TaskRemoteRepository {
     required String token,
   }) async {
     try {
+
       final res = await http.post(Uri.parse("${Constants.backendUri}/tasks"),
           headers: {
             'Content-Type': 'application/json',
@@ -32,6 +33,44 @@ class TaskRemoteRepository {
           ));
 
       if (res.statusCode != 201) {
+        throw jsonDecode(res.body)['error'];
+      }
+
+
+      return TaskModel.fromJson(res.body);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<TaskModel> updateTask({
+    required String taskId,
+    required String title,
+    required String description,
+    required DateTime dueAt,
+    required String priority,
+    required String category,
+    required bool isCompleted,
+    required String token,
+  }) async {
+    try {
+      final res = await http.put(
+        Uri.parse("${Constants.backendUri}/tasks/$taskId"),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token,
+        },
+        body: jsonEncode({
+          'title': title,
+          'description': description,
+          'priority': priority,
+          'category': category,
+          'dueAt': dueAt.toIso8601String(),
+          'isCompleted': isCompleted,
+        }),
+      );
+
+      if (res.statusCode != 200) {
         throw jsonDecode(res.body)['error'];
       }
 

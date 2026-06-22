@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:frontend/features/tasks/cubit/add_new_task_cubit.dart';
 
 import 'app.dart';
 
@@ -17,7 +18,7 @@ void main() {
           create: (_) => TasksCubit(),
         ),
         BlocProvider(
-          create: (_) => TasksCubit(),
+          create: (_) => AddNewTaskCubit(),
         ),
       ],
       child: const CuratorApp(),

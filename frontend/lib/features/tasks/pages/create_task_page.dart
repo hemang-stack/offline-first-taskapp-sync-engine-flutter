@@ -3,8 +3,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/features/auth/cubit/auth_cubit.dart';
+import 'package:frontend/features/tasks/cubit/add_new_task_cubit.dart';
 import 'package:frontend/features/tasks/cubit/tasks_cubit.dart';
-import 'package:frontend/features/tasks/models/task_UI_model.dart';
 import 'package:frontend/features/tasks/widgets/create_task/task_description_input.dart';
 import 'package:frontend/models/task_model.dart';
 
@@ -41,7 +41,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
-  Future<void> createNewTask() async {
+  Future<void> updateExistingTask() async {
     if (!formKey.currentState!.validate()) {
       return;
     }
@@ -56,14 +56,40 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
       selectedTime.minute,
     );
 
-    await context.read<TasksCubit>().createNewTask(
+    await context.read<AddNewTaskCubit>().updateTask(
+          taskId: widget.task!.id,
           title: titleController.text.trim(),
           description: descriptionController.text.trim(),
-          priority: TaskPriority.values.firstWhere(
-            (e) => e.name == selectedPriority,
-          ),
+          priority: selectedPriority,
           category: selectedCategory,
-          scheduledAt: scheduledAt,
+          dueAt: scheduledAt,
+          isCompleted: widget.task!.isCompleted,
+          token: user.user.token,
+        );
+  }
+
+  Future<void> createNewTask() async {
+
+    if (!formKey.currentState!.validate()) {
+      return;
+    }
+
+    final user = context.read<AuthCubit>().state as AuthLoggedIn;
+
+    final scheduledAt = DateTime(
+      selectedDate.year,
+      selectedDate.month,
+      selectedDate.day,
+      selectedTime.hour,
+      selectedTime.minute,
+    );
+
+    await context.read<AddNewTaskCubit>().createNewTask(
+          title: titleController.text.trim(),
+          description: descriptionController.text.trim(),
+          priority: selectedPriority,
+          category: selectedCategory,
+          dueAt: scheduledAt,
           isCompleted: false,
           token: user.user.token,
         );
@@ -147,9 +173,15 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<TasksCubit, TasksState>(
+    return BlocConsumer<AddNewTaskCubit, AddNewTaskState>(
       listener: (context, state) {
         if (state is AddNewTaskSuccess) {
+          final user = context.read<AuthCubit>().state as AuthLoggedIn;
+
+          context.read<TasksCubit>().getAllTasks(
+                token: user.user.token,
+              );
+
           Navigator.pop(context);
 
           ScaffoldMessenger.of(context).showSnackBar(
@@ -161,7 +193,25 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
           );
         }
 
-        if (state is TasksError) {
+        if (state is UpdateTaskSuccess) {
+          final user = context.read<AuthCubit>().state as AuthLoggedIn;
+
+          context.read<TasksCubit>().getAllTasks(
+                token: user.user.token,
+              );
+
+          Navigator.pop(context);
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                "Task updated successfully",
+              ),
+            ),
+          );
+        }
+
+        if (state is AddNewTaskError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.error),
@@ -360,13 +410,15 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                                   top: 10,
                                 ),
                                 child: CuratorButton(
-                                  text: state is TasksLoading
+                                  text: state is AddNewTaskLoading
                                       ? "creating..."
                                       : widget.isEdit
                                           ? "edit your changes"
                                           : "commit to grid",
                                   icon: Icons.bolt,
-                                  onTap: createNewTask,
+                                  onTap: widget.isEdit
+                                      ? updateExistingTask
+                                      : createNewTask,
                                 ),
                               ),
                             ],
