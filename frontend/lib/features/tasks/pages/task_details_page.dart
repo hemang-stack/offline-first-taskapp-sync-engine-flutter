@@ -206,8 +206,8 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
                     ),
                   ),
                   child: IconButton(
-                    onPressed: () {
-                      Navigator.push(
+                    onPressed: () async {
+                      final result = await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (_) => CreateTaskPage(
@@ -216,6 +216,10 @@ class _TaskDetailsPageState extends State<TaskDetailsPage> {
                           ),
                         ),
                       );
+
+                      if (result == true) {
+                        Navigator.pop(context);
+                      }
                     },
                     icon: const Icon(
                       Icons.edit_outlined,

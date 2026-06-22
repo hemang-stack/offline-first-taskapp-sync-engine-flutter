@@ -200,7 +200,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                 token: user.user.token,
               );
 
-          Navigator.pop(context);
+          Navigator.pop(context, true);
 
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
