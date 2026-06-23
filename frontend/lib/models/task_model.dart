@@ -51,53 +51,57 @@ class TaskModel {
   }
 
   Map<String, dynamic> toMap() {
-  return <String, dynamic>{
-    'id': id,
-    'uid': uid,
-    'title': title,
-    'description': description,
-    'priority': priority,
-    'category': category,
-    'isCompleted': isCompleted,
-    'dueAt': dueAt.toIso8601String(),
-    'createdAt': createdAt.toIso8601String(),
-    'updatedAt': updatedAt.toIso8601String(),
-  };
-}
+    return <String, dynamic>{
+      'id': id,
+      'uid': uid,
+      'title': title,
+      'description': description,
+      'priority': priority,
+      'category': category,
+      'isCompleted': isCompleted ? 1 : 0,
+      'dueAt': dueAt.millisecondsSinceEpoch,
+      'createdAt': createdAt.millisecondsSinceEpoch,
+      'updatedAt': updatedAt.millisecondsSinceEpoch,
+    };
+  }
 
   factory TaskModel.fromMap(Map<String, dynamic> map) {
-  return TaskModel(
-    id: map['id'] ?? '',
-
-    uid: map['uid'] ?? '',
-
-    title: map['title'] ?? '',
-
-    description: map['description'] ?? '',
-
-    priority: map['priority'] ?? '',
-
-    category: map['category'] ?? '',
-
-    isCompleted: map['isCompleted'] ?? false,
-
-    dueAt: DateTime.parse(
-      map['dueAt'] ?? map['due_at'],
-    ),
-
-    createdAt: DateTime.parse(
-      map['createdAt'] ?? map['created_at'],
-    ),
-
-    updatedAt: DateTime.parse(
-      map['updatedAt'] ?? map['updated_at'],
-    ),
-  );
-}
+    return TaskModel(
+      id: map['id'] ?? '',
+      uid: map['uid'] ?? '',
+      title: map['title'] ?? '',
+      description: map['description'] ?? '',
+      priority: map['priority'] ?? '',
+      category: map['category'] ?? '',
+      dueAt: map['dueAt'] is int
+          ? DateTime.fromMillisecondsSinceEpoch(
+              map['dueAt'],
+            )
+          : DateTime.parse(
+              map['dueAt'],
+            ),
+      createdAt: map['createdAt'] is int
+          ? DateTime.fromMillisecondsSinceEpoch(
+              map['createdAt'],
+            )
+          : DateTime.parse(
+              map['createdAt'],
+            ),
+      updatedAt: map['updatedAt'] is int
+          ? DateTime.fromMillisecondsSinceEpoch(
+              map['updatedAt'],
+            )
+          : DateTime.parse(
+              map['updatedAt'],
+            ),
+      isCompleted: (map['isCompleted'] ?? 0) == 1,
+    );
+  }
 
   String toJson() => json.encode(toMap());
 
-  factory TaskModel.fromJson(String source) => TaskModel.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory TaskModel.fromJson(String source) =>
+      TaskModel.fromMap(json.decode(source) as Map<String, dynamic>);
 
   @override
   String toString() {
@@ -107,31 +111,30 @@ class TaskModel {
   @override
   bool operator ==(covariant TaskModel other) {
     if (identical(this, other)) return true;
-  
-    return 
-      other.id == id &&
-      other.uid == uid &&
-      other.title == title &&
-      other.description == description &&
-      other.priority == priority &&
-      other.category == category &&
-      other.isCompleted == isCompleted &&
-      other.dueAt == dueAt &&
-      other.createdAt == createdAt &&
-      other.updatedAt == updatedAt;
+
+    return other.id == id &&
+        other.uid == uid &&
+        other.title == title &&
+        other.description == description &&
+        other.priority == priority &&
+        other.category == category &&
+        other.isCompleted == isCompleted &&
+        other.dueAt == dueAt &&
+        other.createdAt == createdAt &&
+        other.updatedAt == updatedAt;
   }
 
   @override
   int get hashCode {
     return id.hashCode ^
-      uid.hashCode ^
-      title.hashCode ^
-      description.hashCode ^
-      priority.hashCode ^
-      category.hashCode ^
-      isCompleted.hashCode ^
-      dueAt.hashCode ^
-      createdAt.hashCode ^
-      updatedAt.hashCode;
+        uid.hashCode ^
+        title.hashCode ^
+        description.hashCode ^
+        priority.hashCode ^
+        category.hashCode ^
+        isCompleted.hashCode ^
+        dueAt.hashCode ^
+        createdAt.hashCode ^
+        updatedAt.hashCode;
   }
 }

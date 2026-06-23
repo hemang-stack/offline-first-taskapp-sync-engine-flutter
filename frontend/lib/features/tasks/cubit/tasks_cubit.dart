@@ -1,17 +1,16 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:frontend/features/tasks/cubit/add_new_task_cubit.dart';
 import 'package:frontend/features/tasks/models/task_UI_model.dart';
+import 'package:frontend/features/tasks/repository/task_local_repository.dart';
 import 'package:frontend/features/tasks/repository/task_remote_repository.dart';
 import 'package:frontend/models/task_model.dart';
 
 part 'tasks_state.dart';
 
 class TasksCubit extends Cubit<TasksState> {
-  TasksCubit() : super(const TasksInitial()){
-    print("TASKS CUBIT CREATED");
-  }
+  TasksCubit() : super(const TasksInitial());
 
   final taskRemoteRepository = TaskRemoteRepository();
+  final taskLocalRepository = TaskLocalRepository();
 
   Future<void> createNewTask({
     required String title,
@@ -34,6 +33,7 @@ class TasksCubit extends Cubit<TasksState> {
         isCompleted: isCompleted,
         token: token,
       );
+      await taskLocalRepository.insertTask(task);
 
     } catch (e) {
       emit(TasksError(e.toString()));

@@ -1,10 +1,13 @@
 import 'dart:convert';
 
 import 'package:frontend/core/common/utils/constants.dart';
+import 'package:frontend/features/tasks/repository/task_local_repository.dart';
 import 'package:frontend/models/task_model.dart';
 import 'package:http/http.dart' as http;
 
 class TaskRemoteRepository {
+  final taskLocalRepository = TaskLocalRepository();
+
   Future<TaskModel> createTask({
     required String title,
     required String description,
@@ -35,7 +38,11 @@ class TaskRemoteRepository {
         throw jsonDecode(res.body)['error'];
       }
 
-      return TaskModel.fromJson(res.body);
+      final task = TaskModel.fromJson(res.body);
+
+      await taskLocalRepository.insertTask(task);
+
+      return task;
     } catch (e) {
       rethrow;
     }
@@ -72,7 +79,11 @@ class TaskRemoteRepository {
         throw jsonDecode(res.body)['error'];
       }
 
-      return TaskModel.fromJson(res.body);
+      final task = TaskModel.fromJson(res.body);
+
+      await taskLocalRepository.updateTask(task);
+
+      return task;
     } catch (e) {
       rethrow;
     }
@@ -97,6 +108,8 @@ class TaskRemoteRepository {
       if (res.statusCode != 200) {
         throw jsonDecode(res.body)['error'];
       }
+
+      await taskLocalRepository.deleteTask(taskId);
     } catch (e) {
       rethrow;
     }
@@ -120,14 +133,22 @@ class TaskRemoteRepository {
 
       final List<dynamic> listOfTasks = jsonDecode(res.body);
 
-      return listOfTasks
+      final tasks = listOfTasks
           .map(
             (e) => TaskModel.fromMap(
               Map<String, dynamic>.from(e),
             ),
           )
           .toList();
+
+      await taskLocalRepository.insertTasks(tasks);
+
+      return tasks;
     } catch (e) {
+      final tasks = await taskLocalRepository.getTask();
+      if (tasks.isNotEmpty) {
+        return tasks;
+      }
       rethrow;
     }
   }
