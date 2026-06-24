@@ -20,11 +20,13 @@ class TasksCubit extends Cubit<TasksState> {
     String? category,
     required bool isCompleted,
     required String token,
+    required String uid,
   }) async {
     try {
       emit(const TasksLoading());
 
       final task = await taskRemoteRepository.createTask(
+        uid: uid,
         title: title,
         description: description ?? '',
         dueAt: scheduledAt,

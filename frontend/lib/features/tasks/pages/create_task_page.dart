@@ -85,6 +85,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
     );
 
     await context.read<AddNewTaskCubit>().createNewTask(
+      uid: user.user.id,
           title: titleController.text.trim(),
           description: descriptionController.text.trim(),
           priority: selectedPriority,

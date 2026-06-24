@@ -4,6 +4,7 @@ import 'package:frontend/core/common/utils/constants.dart';
 import 'package:frontend/features/tasks/repository/task_local_repository.dart';
 import 'package:frontend/models/task_model.dart';
 import 'package:http/http.dart' as http;
+import 'package:uuid/uuid.dart';
 
 class TaskRemoteRepository {
   final taskLocalRepository = TaskLocalRepository();
@@ -16,6 +17,7 @@ class TaskRemoteRepository {
     required String category,
     required bool isCompleted,
     required String token,
+    required String uid,
   }) async {
     try {
       final res = await http.post(Uri.parse("${Constants.backendUri}/tasks"),
@@ -44,7 +46,24 @@ class TaskRemoteRepository {
 
       return task;
     } catch (e) {
-      rethrow;
+      try {
+        final taskModel = TaskModel(
+            id: Uuid().v4(),
+            uid: uid,
+            title: title,
+            description: description,
+            priority: priority,
+            category: category,
+            isCompleted: isCompleted,
+            dueAt: dueAt,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+            isSynced: 0);
+        taskLocalRepository.insertTask(taskModel);
+        return taskModel;
+      } catch (e) {
+        rethrow;
+      }
     }
   }
 

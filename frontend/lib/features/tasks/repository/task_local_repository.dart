@@ -21,7 +21,7 @@ class TaskLocalRepository {
     final path = join(dbPath, "tasks.db");
     return await openDatabase(
       path,
-      version: 1,
+      version: 3,
       onCreate: (db, version) {
         return db.execute('''
 CREATE TABLE $tableName(
@@ -34,7 +34,8 @@ CREATE TABLE $tableName(
   category TEXT NOT NULL,
   isCompleted INTEGER NOT NULL,
   createdAt INTEGER NOT NULL,
-  updatedAt INTEGER NOT NULL
+  updatedAt INTEGER NOT NULL,
+  isSynced INTEGER NOT NULL
 )
 ''');
       },
@@ -43,7 +44,7 @@ CREATE TABLE $tableName(
           await db.execute(
             '''
 ALTER TABLE $tableName
-ADD COLUMN isCompleted INTEGER NOT NULL DEFAULT 0
+ADD COLUMN isSynced INTEGER NOT NULL
 ''',
           );
         }

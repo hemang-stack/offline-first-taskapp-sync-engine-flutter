@@ -5,11 +5,9 @@ import 'package:frontend/models/task_model.dart';
 part 'add_new_task_state.dart';
 
 class AddNewTaskCubit extends Cubit<AddNewTaskState> {
-  AddNewTaskCubit()
-      : super(const AddNewTaskInitial());
+  AddNewTaskCubit() : super(const AddNewTaskInitial());
 
-  final taskRemoteRepository =
-      TaskRemoteRepository();
+  final taskRemoteRepository = TaskRemoteRepository();
 
   Future<void> createNewTask({
     required String title,
@@ -19,16 +17,15 @@ class AddNewTaskCubit extends Cubit<AddNewTaskState> {
     required String category,
     required bool isCompleted,
     required String token,
+    required String uid,
   }) async {
     try {
-
       emit(
         const AddNewTaskLoading(),
       );
 
-      final task =
-          await taskRemoteRepository
-              .createTask(
+      final task = await taskRemoteRepository.createTask(
+        uid: uid,
         title: title,
         description: description,
         dueAt: dueAt,
@@ -41,7 +38,7 @@ class AddNewTaskCubit extends Cubit<AddNewTaskState> {
       emit(
         AddNewTaskSuccess(task),
       );
-    } catch (e) { 
+    } catch (e) {
       emit(
         AddNewTaskError(
           e.toString(),
@@ -65,9 +62,7 @@ class AddNewTaskCubit extends Cubit<AddNewTaskState> {
         const AddNewTaskLoading(),
       );
 
-      final task =
-          await taskRemoteRepository
-              .updateTask(
+      final task = await taskRemoteRepository.updateTask(
         taskId: taskId,
         title: title,
         description: description,
