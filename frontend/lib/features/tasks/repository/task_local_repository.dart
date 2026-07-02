@@ -101,4 +101,21 @@ ADD COLUMN isSynced INTEGER NOT NULL
       whereArgs: [id],
     );
   }
+
+  Future<TaskModel?> getTaskById(String id) async {
+    final db = await database;
+
+    final result = await db.query(
+      tableName,
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+
+    if (result.isNotEmpty) {
+      return TaskModel.fromMap(result.first);
+    }
+
+    return null;
+  }
 }

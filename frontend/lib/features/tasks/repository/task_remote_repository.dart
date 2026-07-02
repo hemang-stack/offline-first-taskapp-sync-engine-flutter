@@ -103,8 +103,26 @@ class TaskRemoteRepository {
       await taskLocalRepository.updateTask(task);
 
       return task;
-    } catch (e) {
-      rethrow;
+    } catch (_) {
+      final localTask = await taskLocalRepository.getTaskById(taskId);
+
+      if (localTask == null) {
+        rethrow;
+      }
+
+      final updatedTask = localTask.copyWith(
+        title: title,
+        description: description,
+        priority: priority,
+        category: category,
+        dueAt: dueAt,
+        isCompleted: isCompleted,
+        updatedAt: DateTime.now(),
+      );
+
+      await taskLocalRepository.updateTask(updatedTask);
+
+      return updatedTask;
     }
   }
 
@@ -129,9 +147,9 @@ class TaskRemoteRepository {
       }
 
       await taskLocalRepository.deleteTask(taskId);
-    } catch (e) {
-      rethrow;
-    }
+    } catch (_) {
+    await taskLocalRepository.deleteTask(taskId);
+  }
   }
 
   Future<List<TaskModel>> getTasks({
