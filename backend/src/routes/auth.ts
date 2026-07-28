@@ -24,9 +24,7 @@ authRouter.post(
     "/signup",
     async (req: Request<{}, {}, SignUpBody>, res: Response) => {
         try {
-            // get req body
             const { name, email, password } = req.body;
-            // check if user exists
             const existingUser = await db
                 .select()
                 .from(users)

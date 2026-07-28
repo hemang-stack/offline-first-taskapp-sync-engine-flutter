@@ -1,7 +1,6 @@
 import 'package:frontend/models/task_model.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:sqflite/sqlite_api.dart';
 
 class TaskLocalRepository {
   final tableName = "tasks";
@@ -21,7 +20,7 @@ class TaskLocalRepository {
     final path = join(dbPath, "tasks.db");
     return await openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: (db, version) {
         return db.execute('''
 CREATE TABLE $tableName(
@@ -35,16 +34,16 @@ CREATE TABLE $tableName(
   isCompleted INTEGER NOT NULL,
   createdAt INTEGER NOT NULL,
   updatedAt INTEGER NOT NULL,
-  isSynced INTEGER NOT NULL
+  syncStatus TEXT NOT NULL
 )
 ''');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
-        if (oldVersion < 2) {
+        if (oldVersion < 4) {
           await db.execute(
             '''
 ALTER TABLE $tableName
-ADD COLUMN isSynced INTEGER NOT NULL
+ADD COLUMN syncStatus TEXT NOT NULL DEFAULT 'synced'
 ''',
           );
         }
@@ -92,13 +91,58 @@ ADD COLUMN isSynced INTEGER NOT NULL
     );
   }
 
-  Future<void> deleteTask(String id) async {
+  Future<void> markTaskForDeletion(String id) async {
+    final db = await database;
+
+    await db.update(
+      tableName,
+      {
+        'syncStatus': 'pending_delete',
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<void> permanentlyDeleteTask(String id) async {
     final db = await database;
 
     await db.delete(
       tableName,
       where: 'id = ?',
       whereArgs: [id],
+    );
+  }
+
+  Future<List<TaskModel>> getPendingTasks() async {
+    final db = await database;
+
+    final result = await db.query(
+      tableName,
+      where: "syncStatus != ?",
+      whereArgs: ['synced'],
+    );
+
+    return result
+        .map(
+          (e) => TaskModel.fromMap(e),
+        )
+        .toList();
+  }
+
+  Future<void> updateSyncStatus({
+    required String taskId,
+    required String syncStatus,
+  }) async {
+    final db = await database;
+
+    await db.update(
+      tableName,
+      {
+        'syncStatus': syncStatus,
+      },
+      where: 'id = ?',
+      whereArgs: [taskId],
     );
   }
 

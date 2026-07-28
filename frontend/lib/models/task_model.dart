@@ -11,7 +11,7 @@ class TaskModel {
   final DateTime dueAt;
   final DateTime createdAt;
   final DateTime updatedAt;
-  final int isSynced;
+  final String syncStatus;
   TaskModel({
     required this.id,
     required this.uid,
@@ -23,7 +23,7 @@ class TaskModel {
     required this.dueAt,
     required this.createdAt,
     required this.updatedAt,
-    required this.isSynced,
+    required this.syncStatus,
   });
 
   TaskModel copyWith({
@@ -37,7 +37,7 @@ class TaskModel {
     DateTime? dueAt,
     DateTime? createdAt,
     DateTime? updatedAt,
-    int? isSynced,
+    String? syncStatus,
   }) {
     return TaskModel(
       id: id ?? this.id,
@@ -50,7 +50,7 @@ class TaskModel {
       dueAt: dueAt ?? this.dueAt,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      isSynced: isSynced ?? this.isSynced,
+      syncStatus: syncStatus ?? this.syncStatus,
     );
   }
 
@@ -66,7 +66,7 @@ class TaskModel {
       'dueAt': dueAt.millisecondsSinceEpoch,
       'createdAt': createdAt.millisecondsSinceEpoch,
       'updatedAt': updatedAt.millisecondsSinceEpoch,
-      'isSynced': isSynced,
+      'isSynced': syncStatus,
     };
   }
 
@@ -100,7 +100,7 @@ class TaskModel {
               map['updatedAt'],
             ),
       isCompleted: (map['isCompleted'] ?? 0) == 1,
-      isSynced: map['isSynced'] ?? 1,
+      syncStatus: map['syncStatus'] as String,
     );
   }
 
@@ -128,7 +128,7 @@ class TaskModel {
         other.dueAt == dueAt &&
         other.createdAt == createdAt &&
         other.updatedAt == updatedAt &&
-        other.isSynced == isSynced;
+        other.syncStatus == syncStatus;
   }
 
   @override
@@ -143,6 +143,6 @@ class TaskModel {
         dueAt.hashCode ^
         createdAt.hashCode ^
         updatedAt.hashCode ^
-        isSynced.hashCode;
+        syncStatus.hashCode;
   }
 }

@@ -58,8 +58,8 @@ class TaskRemoteRepository {
             dueAt: dueAt,
             createdAt: DateTime.now(),
             updatedAt: DateTime.now(),
-            isSynced: 0);
-        taskLocalRepository.insertTask(taskModel);
+            syncStatus: "pending_create");
+        await taskLocalRepository.insertTask(taskModel);
         return taskModel;
       } catch (e) {
         rethrow;
@@ -118,6 +118,7 @@ class TaskRemoteRepository {
         dueAt: dueAt,
         isCompleted: isCompleted,
         updatedAt: DateTime.now(),
+        syncStatus: "pending_update",
       );
 
       await taskLocalRepository.updateTask(updatedTask);
@@ -146,10 +147,12 @@ class TaskRemoteRepository {
         throw jsonDecode(res.body)['error'];
       }
 
-      await taskLocalRepository.deleteTask(taskId);
+      // Backend deleted successfully
+      await taskLocalRepository.permanentlyDeleteTask(taskId);
     } catch (_) {
-    await taskLocalRepository.deleteTask(taskId);
-  }
+      // Offline - don't delete permanently
+      await taskLocalRepository.markTaskForDeletion(taskId);
+    }
   }
 
   Future<List<TaskModel>> getTasks({
@@ -187,6 +190,78 @@ class TaskRemoteRepository {
         return tasks;
       }
       rethrow;
+    }
+  }
+
+  Future<TaskModel> syncCreateTask({
+    required TaskModel task,
+    required String token,
+  }) async {
+    final res = await http.post(
+      Uri.parse("${Constants.backendUri}/tasks"),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-auth-token': token,
+      },
+      body: jsonEncode({
+        'title': task.title,
+        'description': task.description,
+        'priority': task.priority,
+        'category': task.category,
+        'dueAt': task.dueAt.toIso8601String(),
+        'isCompleted': task.isCompleted,
+      }),
+    );
+
+    if (res.statusCode != 201) {
+      throw Exception("Failed to sync create");
+    }
+
+    return TaskModel.fromJson(res.body);
+  }
+
+  Future<void> syncUpdateTask({
+    required TaskModel task,
+    required String token,
+  }) async {
+    final res = await http.put(
+      Uri.parse("${Constants.backendUri}/tasks/${task.id}"),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-auth-token': token,
+      },
+      body: jsonEncode({
+        'title': task.title,
+        'description': task.description,
+        'priority': task.priority,
+        'category': task.category,
+        'dueAt': task.dueAt.toIso8601String(),
+        'isCompleted': task.isCompleted,
+      }),
+    );
+
+    if (res.statusCode != 200) {
+      throw Exception("Failed to sync update");
+    }
+  }
+
+  Future<void> syncDeleteTask({
+    required String taskId,
+    required String token,
+  }) async {
+    final res = await http.delete(
+      Uri.parse("${Constants.backendUri}/tasks"),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-auth-token': token,
+      },
+      body: jsonEncode({
+        'taskId': taskId,
+      }),
+    );
+
+    if (res.statusCode != 200) {
+      throw Exception("Failed to sync delete");
     }
   }
 }
