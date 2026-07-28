@@ -15,15 +15,13 @@ class CuratorApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-
       title: 'Curator',
-
       theme: AppTheme.darkTheme,
-
       home: BlocBuilder<AuthCubit, AuthState>(
         builder: (context, state) {
-
           if (state is AuthLoggedIn) {
+            print("TOKEN:");
+            print(state.user.token);
             return const MainNavigationPage();
           }
 

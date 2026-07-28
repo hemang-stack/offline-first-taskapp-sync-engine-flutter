@@ -68,16 +68,14 @@ ADD COLUMN syncStatus TEXT NOT NULL DEFAULT 'synced'
 
   Future<List<TaskModel>> getTask() async {
     final db = await database;
-    final result = await db.query(tableName);
 
-    if (result.isNotEmpty) {
-      List<TaskModel> tasks = [];
-      for (final elem in result) {
-        tasks.add(TaskModel.fromMap(elem));
-      }
-      return tasks;
-    }
-    return [];
+    final result = await db.query(
+      tableName,
+      where: "syncStatus != ?",
+      whereArgs: ["pending_delete"],
+    );
+
+    return result.map((e) => TaskModel.fromMap(e)).toList();
   }
 
   Future<void> updateTask(TaskModel task) async {
@@ -102,6 +100,8 @@ ADD COLUMN syncStatus TEXT NOT NULL DEFAULT 'synced'
       where: 'id = ?',
       whereArgs: [id],
     );
+
+    await getTaskById(id);
   }
 
   Future<void> permanentlyDeleteTask(String id) async {

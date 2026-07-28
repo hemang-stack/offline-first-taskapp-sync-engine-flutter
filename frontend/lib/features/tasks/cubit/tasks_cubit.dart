@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/features/tasks/models/task_UI_model.dart';
 import 'package:frontend/features/tasks/repository/task_local_repository.dart';
 import 'package:frontend/features/tasks/repository/task_remote_repository.dart';
+import 'package:frontend/features/tasks/services/sync_service.dart';
 import 'package:frontend/models/task_model.dart';
 
 part 'tasks_state.dart';
@@ -11,6 +12,7 @@ class TasksCubit extends Cubit<TasksState> {
 
   final taskRemoteRepository = TaskRemoteRepository();
   final taskLocalRepository = TaskLocalRepository();
+  final syncService = SyncService();
 
   Future<void> createNewTask({
     required String title,
@@ -36,43 +38,45 @@ class TasksCubit extends Cubit<TasksState> {
         token: token,
       );
       await taskLocalRepository.insertTask(task);
-
     } catch (e) {
       emit(TasksError(e.toString()));
     }
   }
 
   Future<void> deleteTask({
-  required String taskId,
-  required String token,
-}) async {
-  try {
-    emit(
-      const TasksLoading(),
-    );
+    required String taskId,
+    required String token,
+  }) async {
+    try {
+      emit(
+        const TasksLoading(),
+      );
 
-    await taskRemoteRepository.deleteTask(
-      taskId: taskId,
-      token: token,
-    );
+      await taskRemoteRepository.deleteTask(
+        taskId: taskId,
+        token: token,
+      );
 
-    emit(
-      const DeleteTaskSuccess(),
-    );
-  } catch (e) {
-    emit(
-      TasksError(
-        e.toString(),
-      ),
-    );
+      emit(
+        const DeleteTaskSuccess(),
+      );
+    } catch (e) {
+      emit(
+        TasksError(
+          e.toString(),
+        ),
+      );
+    }
   }
-}
 
   Future<void> getAllTasks({
     required String token,
   }) async {
-
     emit(TasksLoading());
+
+    await syncService.syncTasks(
+      token: token,
+    );
 
     final tasks = await taskRemoteRepository.getTasks(
       token: token,

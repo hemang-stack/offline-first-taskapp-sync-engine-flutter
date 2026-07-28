@@ -57,7 +57,7 @@ class TaskUIModel {
 
   String get formattedStartTime => formatTime(scheduledAt);
 
-  String get time => '$formattedStartTime';
+  String get time => formattedStartTime;
 
   @override
   bool operator ==(Object other) =>
